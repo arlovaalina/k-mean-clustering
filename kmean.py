@@ -1,17 +1,22 @@
 from functools import reduce
+from tkinter import *
+from variables import *
 import random
 import math
 
-WINDOW_HEIGHT = 600;
-WINDOW_WIDTH = 600;
-
-points_count = 1000;
-classes_count = 8;
+def paint_points(points, centroids):
+    canvas.delete("all")
+    for i in range(0, points_count):
+        canvas.create_oval(points[i]["x"], points[i]["y"], points[i]["x"] + 1, points[i]["y"] + 1,
+            fill=COLORS[points[i]["class"]], outline=COLORS[points[i]["class"]])
+    for j in range(0, classes_count):
+        canvas.create_oval(centroids[j]["x"], centroids[j]["y"], centroids[j]["x"] + 10, centroids[j]["y"] + 10,
+            fill=COLORS[centroids[j]["class"]], outline=COLORS[centroids[j]["class"]])
 
 def initialize_points():
     points = [{
-        'x': random.randint(0, WINDOW_WIDTH),
-        'y': random.randint(0, WINDOW_HEIGHT),
+        'x': random.randint(0, FIELD_WIDTH),
+        'y': random.randint(0, FIELD_HEIGHT),
         'class': 0,
     } for point in range(points_count)]
     return points
@@ -45,17 +50,29 @@ def equal_centroids(a, b):
             return False
     return True
 
-def main():
+def start_algorithm(event):
+    print('start')
     points = initialize_points()
     centroids = initialize_centroids(points)
     continue_clasterization = True
     while (continue_clasterization):
+        paint_points(points, centroids)
+        root.update()
         allocate_classes(points, centroids)
         new_centroids = find_new_centroids(points)
         equal = equal_centroids(new_centroids, centroids)
         centroids = new_centroids
         if (equal):
             continue_clasterization = False
+    print('finish')
 
-if __name__ == "__main__":
-    main()
+
+root = Tk()
+root.geometry("{0}x{1}".format(WINDOW_WIDTH, WINDOW_HEIGHT))
+canvas = Canvas(root, width = FIELD_WIDTH, height = FIELD_HEIGHT, borderwidth = 1, background='white')
+canvas.place(x = 200, y = 10)
+start_button = Button(root, text = "Start algorithm", width = 10)
+start_button.place(x = 20, y = 10)
+start_button.bind("<Button-1>", start_algorithm)
+
+root.mainloop()
